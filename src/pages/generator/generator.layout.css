@@ -1,0 +1,53 @@
+/* src/pages/generator/generator.layout.css
+   Layout seguro para Generator: tres columnas (left - center - right).
+   Prefijos gen- para evitar colisiones.
+*/
+
+.gen-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr 340px; /* izquierda fija, centro flexible, derecha fija */
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px; /* ajusta al gusto */
+}
+
+/* asegurar que la columna central pueda encoger correctamente */
+.gen-center {
+  min-width: 0; /* CRUCIAL para que el contenido pueda hacerse más pequeño dentro del grid */
+  overflow: visible;
+}
+
+/* forzar que los elementos dentro del centro no rompan el ancho */
+.gen-center > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* left y right panel */
+.gen-left {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gen-right {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* si hay elementos internos que usan flex, asegurarlos */
+.gen-center * {
+  min-width: 0; /* aplicar de forma amplia para prevenir problemas de shrink */
+}
+
+/* responsive: en pantallas pequenas pasar a una sola columna (mobile) */
+@media (max-width: 980px) {
+  .gen-layout {
+    grid-template-columns: 1fr; /* apilar */
+    gap: 12px;
+    padding: 12px;
+  }
+  .gen-left, .gen-right, .gen-center { width: 100%; }
+}

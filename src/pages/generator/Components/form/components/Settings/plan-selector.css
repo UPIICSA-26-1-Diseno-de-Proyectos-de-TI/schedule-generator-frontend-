@@ -1,0 +1,4 @@
+
+.plan-selector-label { font-weight: 700; margin-bottom: 6px; display:block; }
+.plan-periods-wrapper { display:flex; flex-wrap:wrap; gap:10px; }
+.plan-periods-wrapper .form-check { min-width:120px; }

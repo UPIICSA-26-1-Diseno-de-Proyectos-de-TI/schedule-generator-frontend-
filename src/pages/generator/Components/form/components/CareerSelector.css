@@ -1,0 +1,127 @@
+/* contenedor del modal */
+.career-modal {
+  display:flex;
+  flex-direction:column;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 100%;
+  outline: none;
+}
+
+/* header */
+.career-modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.career-modal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* body: permite scroll vertical, bloquea overflow horizontal */
+.career-modal-body {
+  padding: 18px;
+  overflow-y: auto;
+  overflow-x: hidden;           /* evitar scroll horizontal */
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+}
+
+/* GRID: ocupa todo el ancho y ajusta cantidad de columnas */
+.career-grid {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  /* tarjetas mínimo 180px, se expanden para ocupar el ancho disponible */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-items: start;
+  justify-items: stretch;
+  box-sizing: border-box;
+  padding-bottom: 12px;
+}
+
+/* Cada item es un botón ocupando la celda completa */
+.career-item {
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+.career-item:focus { outline: none; }
+
+/* tarjeta: utiliza la variable CSS --bg-color para el color dinámico */
+.career-card {
+  color: white;
+  border-radius: 12px;
+  padding: 18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:92px;
+  transition: transform .14s cubic-bezier(.2,.9,.2,1), box-shadow .14s ease, filter .14s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  /* degradado sutil: color-mix si disponible, si no, se usará var(--bg-color) directo */
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-color) 86%, rgba(0,0,0,0.06)), var(--bg-color));
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Fallback si browser no soporta color-mix */
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+  .career-card { background: var(--bg-color); }
+}
+
+/* hover/focus: interacción visual */
+.career-card:hover,
+.career-item:focus .career-card {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+  filter: brightness(1.06);
+  outline: none;
+}
+
+/* icono y texto */
+.career-icon svg { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.12)); }
+.career-text { padding: 0 8px; line-height:1.08; }
+
+/* mensaje cuando no hay carreras */
+.no-careers { color:#666; text-align:center; padding:30px; font-size:14px; }
+
+/* responsive: columnas y tamaños */
+@media (max-width: 640px) {
+  .career-grid { gap: 12px; grid-template-columns: repeat(1, 1fr); }
+  .career-card { min-height:86px; padding:14px; font-size:13px; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .career-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .career-card { min-height:100px; }
+}
+@media (min-width: 1024px) {
+  .career-grid { grid-template-columns: repeat(3, 1fr); gap:18px; }
+  .career-card { min-height:120px; }
+}
+@media (min-width: 1400px) {
+  .career-grid { gap:22px; }
+  .career-card { min-height:130px; padding:22px; }
+}
+
+/* accesibilidad: foco visible con borde ligero */
+.career-item:focus .career-card {
+  box-shadow: 0 14px 36px rgba(0,0,0,0.2), 0 0 0 3px rgba(255,255,255,0.06) inset;
+}
