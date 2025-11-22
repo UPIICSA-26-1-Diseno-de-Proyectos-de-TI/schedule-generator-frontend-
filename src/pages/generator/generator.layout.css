@@ -1,53 +1,75 @@
 /* src/pages/generator/generator.layout.css
-   Layout seguro para Generator: tres columnas (left - center - right).
-   Prefijos gen- para evitar colisiones.
+   Layout de la pantalla del generador:
+   - Izquierda: Horario + Horarios generados (apilados)
+   - Derecha: Ajustes
 */
 
+/* Contenedor general */
 .gen-layout {
-  display: grid;
-  grid-template-columns: 320px 1fr 340px; /* izquierda fija, centro flexible, derecha fija */
-  gap: 24px;
-  align-items: start;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;              /* separación real entre columnas */
   width: 100%;
-  box-sizing: border-box;
-  padding: 18px; /* ajusta al gusto */
-}
-
-/* asegurar que la columna central pueda encoger correctamente */
-.gen-center {
-  min-width: 0; /* CRUCIAL para que el contenido pueda hacerse más pequeño dentro del grid */
-  overflow: visible;
-}
-
-/* forzar que los elementos dentro del centro no rompan el ancho */
-.gen-center > * {
-  width: 100%;
-  max-width: 100%;
+  max-width: 1180px;      /* evita que todo se abra demasiado en monitores muy anchos */
+  margin: 0 auto;         /* centra el bloque completo */
+  padding: 18px;
   box-sizing: border-box;
 }
 
-/* left y right panel */
+/* Columna izquierda: Horario + Horarios generados */
 .gen-left {
-  width: 100%;
-  box-sizing: border-box;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;              /* espacio entre “Horario” y “Horarios generados” */
+  min-width: 0;
 }
 
+/* Columna derecha: panel de Ajustes */
 .gen-right {
+  flex: 0 0 340px;        /* ancho base del panel de ajustes */
+  max-width: 380px;
   width: 100%;
-  box-sizing: border-box;
+  min-width: 300px;
 }
 
-/* si hay elementos internos que usan flex, asegurarlos */
-.gen-center * {
-  min-width: 0; /* aplicar de forma amplia para prevenir problemas de shrink */
+/* Bloques que envuelven cada card */
+.gen-card-block {
+  width: 100%;
 }
 
-/* responsive: en pantallas pequenas pasar a una sola columna (mobile) */
+/* 🔹 TRUCO IMPORTANTE:
+   Las cards dentro de estas columnas YA no tendrán max-width de 420px,
+   sino que se estiran a todo el ancho de la columna. */
+.gen-left .card,
+.gen-right .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0;              /* por si algún estilo anterior mete márgenes laterales */
+}
+
+/* Evitar que elementos internos provoquen overflow horizontal */
+.gen-left *,
+.gen-right * {
+  min-width: 0;
+}
+
+/* ---------- Responsivo (pantallas pequeñas) ---------- */
+
 @media (max-width: 980px) {
   .gen-layout {
-    grid-template-columns: 1fr; /* apilar */
-    gap: 12px;
+    flex-direction: column;   /* apilar columnas una debajo de otra */
+    align-items: stretch;
+    gap: 16px;
     padding: 12px;
+    max-width: 100%;
   }
-  .gen-left, .gen-right, .gen-center { width: 100%; }
+
+  .gen-left,
+  .gen-right {
+    flex: 1 1 auto;
+    max-width: none;
+    width: 100%;
+  }
 }

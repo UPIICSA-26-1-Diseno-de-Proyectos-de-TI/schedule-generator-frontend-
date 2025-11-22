@@ -1,108 +1,159 @@
-import { createSlice } from "@reduxjs/toolkit"
+// src/store/slices/form/formSlice.js
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  levels: [],
-  semesters: [],
-  startTime: '07:00',
-  endTime: '15:00',
-  career: '',
-  shifts:["M", "V"],
-  courseLength: 7,
-  credits: 100,
-  availableUses: 1,
+  // Parámetros de filtros
+  levels: [],                // se mantiene en sync con semesters
+  semesters: [],             // periodos seleccionados (1..8)
+  startTime: "07:00",
+  endTime: "15:00",
+  career: null,              // objeto carrera { value, text, planes }
+  shifts: ["M", "V"],        // turnos disponibles (por ahora fijo)
+
+  // Parámetros del generador
+  courseLength: 7,           // número de materias por horario
+  credits: 100,              // créditos totales objetivo
+  availableUses: 1,          // usos disponibles del generador
+
+  // Restricciones
   excludedTeachers: [],
   excludedSubjects: [],
   extraSubjects: [],
   requiredSubjects: [],
-  isGenerating: false
-}
 
-export const formSlice = createSlice({
-  name: 'form',
+  // Estado de carga
+  isGenerating: false,
+};
+
+const formSlice = createSlice({
+  name: "form",
   initialState,
   reducers: {
-    addSemester: (state, action) => {
-      state.semesters.push(action.payload)
+    changeStartTime(state, action) {
+      state.startTime = action.payload;
     },
-    removeSemester: (state, action) => {
-      state.semesters.splice(state.semesters.indexOf(action.payload), 1)
+    changeEndTime(state, action) {
+      state.endTime = action.payload;
     },
-    addLevel: (state, action) => {
-      state.levels.push(action.payload)
+
+    addSemester(state, action) {
+      const value = String(action.payload);
+      if (!state.semesters.map(String).includes(value)) {
+        state.semesters.push(value);
+      }
+      // el backend usa "levels" y "semesters", los mantenemos iguales
+      state.levels = [...state.semesters];
     },
-    removeLevel: (state, action) => {
-      state.levels.splice(state.levels.indexOf(action.payload), 1)
+    removeSemester(state, action) {
+      const value = String(action.payload);
+      state.semesters = state.semesters.filter((s) => String(s) !== value);
+      state.levels = [...state.semesters];
     },
-    changeStartTime: (state, action) => {
-      state.startTime = action.payload
+
+    setCareer(state, action) {
+      state.career = action.payload; // objeto carrera completo
+      // al cambiar de carrera reiniciamos periodos
+      state.semesters = [];
+      state.levels = [];
     },
-    changeEndTime: (state, action) => {
-      state.endTime = action.payload
+
+    changeCourseLength(state, action) {
+      state.courseLength = Number(action.payload) || 0;
     },
-    setCareer: (state, action) => {
-      state.career = action.payload
+    changeCredits(state, action) {
+      state.credits = Number(action.payload) || 0;
     },
-    changeCourseLength: (state, action) => {
-      state.courseLength = action.payload
+    changeAvailableUses(state, action) {
+      state.availableUses = Number(action.payload) || 1;
     },
-    changeCredits: (state, action) => {
-      state.credits = action.payload
+
+    // Exclusión de profesores
+    addExcludedTeachers(state, action) {
+      const name = (action.payload || "").trim();
+      if (!name) return;
+      if (!state.excludedTeachers.includes(name)) {
+        state.excludedTeachers.push(name);
+      }
     },
-    changeAvailableUses: (state, action) => {
-      state.availableUses = action.payload
+    removeExcludedTeachers(state, action) {
+      const name = action.payload;
+      state.excludedTeachers = state.excludedTeachers.filter(
+        (t) => t !== name
+      );
     },
-    addExcludedTeachers: (state, action) => {
-      state.excludedTeachers.push(action.payload);
+
+    // Exclusión de materias
+    addExcludedSubjects(state, action) {
+      const name = (action.payload || "").trim();
+      if (!name) return;
+      if (!state.excludedSubjects.includes(name)) {
+        state.excludedSubjects.push(name);
+      }
     },
-    removeExcludedTeachers: (state, action) => {
-      state.excludedTeachers.splice(state.excludedTeachers.indexOf(action.payload), 1)
+    removeExcludedSubjects(state, action) {
+      const name = action.payload;
+      state.excludedSubjects = state.excludedSubjects.filter(
+        (s) => s !== name
+      );
     },
-    addExcludedSubjects: (state, action) => {
-      state.excludedSubjects.push(action.payload);
+
+    // Materias extra
+    addExtraSubject(state, action) {
+      const name = (action.payload || "").trim();
+      if (!name) return;
+      if (!state.extraSubjects.includes(name)) {
+        state.extraSubjects.push(name);
+      }
     },
-    removeExcludedSubjects: (state, action) => {
-      state.excludedSubjects.splice(state.excludedSubjects.indexOf(action.payload), 1)
+    removeExtraSubject(state, action) {
+      const name = action.payload;
+      state.extraSubjects = state.extraSubjects.filter((s) => s !== name);
     },
-    addExtraSubject: (state, action) => {
-      state.extraSubjects.push(action.payload)
+
+    // Materias obligatorias
+    addRequiredSubject(state, action) {
+      const name = (action.payload || "").trim();
+      if (!name) return;
+      if (!state.requiredSubjects.includes(name)) {
+        state.requiredSubjects.push(name);
+      }
     },
-    removeExtraSubject: (state, action) => {
-      state.extraSubjects.splice(state.extraSubjects.indexOf(action.payload), 1)
+    removeRequiredSubject(state, action) {
+      const name = action.payload;
+      state.requiredSubjects = state.requiredSubjects.filter(
+        (s) => s !== name
+      );
     },
-    addRequiredSubject: (state, action) => {
-      state.requiredSubjects.push(action.payload)
+
+    // Estado de generación
+    startScheduleGeneration(state) {
+      state.isGenerating = true;
     },
-    removeRequiredSubject: (state, action) => {
-      state.requiredSubjects.splice(state.requiredSubjects.indexOf(action.payload), 1)
+    finishScheduleGeneration(state) {
+      state.isGenerating = false;
     },
-    startScheduleGeneration: (state) => {
-      state.isGenerating = true
-    },
-    finishScheduleGeneration: (state) => {
-      state.isGenerating = false
-    }
   },
-})
+});
 
 export const {
-  addSemester,
-  removeSemester,
-  addLevel,
-  removeLevel,
   changeStartTime,
   changeEndTime,
+  addSemester,
+  removeSemester,
   setCareer,
   changeCourseLength,
   changeCredits,
   changeAvailableUses,
   addExcludedTeachers,
-  removeExcludedTeachers,addExcludedSubjects,
-  removeExcludedSubjects, addExtraSubject,
+  removeExcludedTeachers,
+  addExcludedSubjects,
+  removeExcludedSubjects,
+  addExtraSubject,
   removeExtraSubject,
   addRequiredSubject,
   removeRequiredSubject,
   startScheduleGeneration,
-  finishScheduleGeneration
-} = formSlice.actions
+  finishScheduleGeneration,
+} = formSlice.actions;
 
-export default formSlice.reducer
+export default formSlice.reducer;

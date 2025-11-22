@@ -1,0 +1,89 @@
+/* Overlay oscuro a pantalla completa */
+.exclude-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;                  /* por encima de cards y paneles */
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;                  /* margen interno para pantallas pequeñas */
+  box-sizing: border-box;
+}
+
+/* Contenedor principal del modal */
+.exclude-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;               /* ancho máximo del modal */
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+  padding: 20px 22px 18px;
+  box-sizing: border-box;
+}
+
+/* Encabezado del modal */
+.exclude-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.exclude-modal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Botón X de cierre */
+.exclude-modal-close {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 999px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exclude-modal-close:hover {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.exclude-modal-close span {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+/* Cuerpo del modal */
+.exclude-modal-body {
+  margin-bottom: 18px;
+}
+
+/* Pie del modal (botones inferiores) */
+.exclude-modal-footer {
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .exclude-modal-card {
+    padding: 16px 14px 14px;
+  }
+
+  .exclude-modal-title {
+    font-size: 1rem;
+  }
+}

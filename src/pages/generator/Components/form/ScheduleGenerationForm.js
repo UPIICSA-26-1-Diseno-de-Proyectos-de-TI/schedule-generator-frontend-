@@ -1,85 +1,109 @@
-// src/pages/generator/Components/picker/ScheduleGenerationForm.jsx
-import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './form.css';
-import { useDispatch, useSelector } from 'react-redux';
+// src/pages/generator/Components/form/ScheduleGenerationForm.js
+import React, { useState, useEffect } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./form.css";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addSemester,
   changeEndTime,
   changeStartTime,
-  removeSemester
-} from '../../../../store/slices/form/formSlice';
-import { getSchedules } from '../../../../store/slices/form/thunks';
-import CareerSelector from './components/CareerSelector';
-import TeacherExcluder from './components/TeacherExcluder';
-import SubjectExcluder from './components/SubjectExcluder';
-import ExtraSubjectsProvider from './components/ExtraSubjectsProvider';
-import RequiredSubjectsProvider from './components/RequiredSubjectsProvider';
+  removeSemester,
+} from "../../../../store/slices/form/formSlice";
+import { getSchedules } from "../../../../store/slices/form/thunks";
+import CareerSelector from "./components/CareerSelector";
+import TeacherExcluder from "./components/TeacherExcluder";
+import SubjectExcluder from "./components/SubjectExcluder";
+import ExtraSubjectsProvider from "./components/ExtraSubjectsProvider";
+import RequiredSubjectsProvider from "./components/RequiredSubjectsProvider";
 
 const ScheduleGenerationForm = () => {
   const dispatch = useDispatch();
 
-  // datos globales del store
-  const career = useSelector(state => state.form.career);
-  const semesters = useSelector(state => state.form.semesters);
-  const startTime = useSelector(state => state.form.startTime);
-  const endTime = useSelector(state => state.form.endTime);
-  const excludedTeachers = useSelector(state => state.form.excludedTeachers);
-  const excludedSubjects = useSelector(state => state.form.excludedSubjects);
-  const extraSubjects = useSelector(state => state.form.extraSubjects);
-  const requiredSubjects = useSelector(state => state.form.requiredSubjects);
-  const loading = useSelector(state => state.form.isGenerating);
+  const {
+    semesters,
+    startTime,
+    endTime,
+    career,
+    excludedTeachers,
+    excludedSubjects,
+    extraSubjects,
+    requiredSubjects,
+    isGenerating: loading,
+  } = useSelector((state) => state.form);
 
-  // UI modals
-  const [excludedTeachersModalOpen, setExcludedTeachersModalOpen] = useState(false);
-  const [excludedSubjectModalOpen, setExcludedSubjectModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [excludedTeachersModalOpen, setExcludedTeachersModalOpen] =
+    useState(false);
+  const [excludedSubjectModalOpen, setExcludedSubjectModalOpen] =
+    useState(false);
   const [extraSubjectsModalOpen, setExtraSubjectsModalOpen] = useState(false);
-  const [requiredSubjectsModalOpen, setRequiredSubjectsModalOpen] = useState(false);
+  const [requiredSubjectsModalOpen, setRequiredSubjectsModalOpen] =
+    useState(false);
 
-  // Local state: plan seleccionado (value) y objeto del plan
-  const [selectedPlanValue, setSelectedPlanValue] = useState('');
-  const [selectedPlanObj, setSelectedPlanObj] = useState(null);
+  const [formError, setFormError] = useState("");
 
-  // Al cambiar de carrera, limpiar plan y semestres en store
+  // Cuando cambia la carrera, si no hay plan seleccionado, tomamos el primero
   useEffect(() => {
-    setSelectedPlanValue('');
-    setSelectedPlanObj(null);
-    if (Array.isArray(semesters) && semesters.length > 0) {
-      semesters.forEach(s => dispatch(removeSemester(s)));
+    if (career && Array.isArray(career.planes) && career.planes.length > 0) {
+      setSelectedPlan((prev) => prev || career.planes[0]);
+    } else {
+      setSelectedPlan(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [career]);
+
+  const handleTimeChange = (e, type) => {
+    const value = e.target.value;
+    if (type === "start") {
+      dispatch(changeStartTime(value));
+    } else {
+      dispatch(changeEndTime(value));
+    }
+  };
+
+  const handleSemesterToggle = (value) => {
+    const v = String(value);
+    if (semesters.map(String).includes(v)) {
+      dispatch(removeSemester(v));
+    } else {
+      dispatch(addSemester(v));
+    }
+  };
 
   const handlePlanChange = (e) => {
     const value = e.target.value;
-    // limpiar semestres actuales en el store
+
+    const plans = career?.planes || [];
+    const plan = plans.find((p) => String(p.value) === String(value)) || null;
+    setSelectedPlan(plan);
+
+    // IMPORTANTE: al cambiar de plan, limpiamos los semestres seleccionados
     if (Array.isArray(semesters) && semesters.length > 0) {
-      semesters.forEach(s => dispatch(removeSemester(s)));
-    }
-    setSelectedPlanValue(value);
-
-    // buscar objeto del plan en career.planes (soporte para career.planes)
-    if (career && Array.isArray(career.planes)) {
-      const planObj = career.planes.find(p => String(p.value) === String(value));
-      setSelectedPlanObj(planObj || null);
-    } else {
-      setSelectedPlanObj(null);
+      semesters.forEach((s) => dispatch(removeSemester(s)));
     }
   };
 
-  const handlePeriodCheckbox = (event) => {
-    const value = String(event.target.value);
-    if (event.target.checked) {
-      dispatch(addSemester(value));
-    } else {
-      dispatch(removeSemester(value));
-    }
-  };
-
-  const handdleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setFormError("");
+
+    if (!career) {
+      setFormError(
+        "Primero selecciona una carrera (desde el login y el selector)."
+      );
+      return;
+    }
+
+    if (!selectedPlan) {
+      setFormError("Selecciona un plan de estudios.");
+      return;
+    }
+
+    if (!Array.isArray(semesters) || semesters.length === 0) {
+      setFormError("Selecciona al menos un semestre / periodo disponible.");
+      return;
+    }
+
     const params = {
-      // básicos que envía el form: adaptalos si tu backend requiere otros campos
       semesters,
       startTime,
       endTime,
@@ -87,149 +111,186 @@ const ScheduleGenerationForm = () => {
       excludedTeachers,
       excludedSubjects,
       extraSubjects,
-      requiredSubjects
+      requiredSubjects,
     };
+
     dispatch(getSchedules(params));
   };
 
   const getPlanLabel = (plan) => {
-    if (!plan) return '';
-    return plan.text || plan.nombre || `Plan ${plan.value || ''}`;
+    if (!plan) return "";
+    return plan.text || plan.nombre || `Plan ${plan.value || ""}`;
   };
+
+  const planOptions = career?.planes || [];
+  const periodOptions = selectedPlan?.periodos || [];
 
   return (
     <div className="card shadow-sm px-3 py-0 h-100">
+      {/* Selector de carrera */}
       <CareerSelector />
-      <TeacherExcluder isOpen={excludedTeachersModalOpen} setIsOpen={setExcludedTeachersModalOpen} />
-      <SubjectExcluder isOpen={excludedSubjectModalOpen} setIsOpen={setExcludedSubjectModalOpen} />
-      <ExtraSubjectsProvider isOpen={extraSubjectsModalOpen} setIsOpen={setExtraSubjectsModalOpen} />
-      <RequiredSubjectsProvider isOpen={requiredSubjectsModalOpen} setIsOpen={setRequiredSubjectsModalOpen} />
 
-      <div className="card-body pt-1">
-        <div className='position-relative'>
-          <p className='fs-4 text-center mt-2 mb-1 fw-medium'>Ajustes</p>
-          <hr className='mb-3 mt-1 text-gray-100 bg-dark shadow-sm w-90' />
-        </div>
+      {/* Modales de exclusión / materias */}
+      <TeacherExcluder
+        isOpen={excludedTeachersModalOpen}
+        setIsOpen={setExcludedTeachersModalOpen}
+      />
+      <SubjectExcluder
+        isOpen={excludedSubjectModalOpen}
+        setIsOpen={setExcludedSubjectModalOpen}
+      />
+      <ExtraSubjectsProvider
+        isOpen={extraSubjectsModalOpen}
+        setIsOpen={setExtraSubjectsModalOpen}
+      />
+      <RequiredSubjectsProvider
+        isOpen={requiredSubjectsModalOpen}
+        setIsOpen={setRequiredSubjectsModalOpen}
+      />
 
-        <form className="d-flex flex-column justify-content-between" onSubmit={handdleSubmit}>
+      <div className="card-body px-2 py-3">
+        <h4 className="card-title text-center mb-3">Ajustes</h4>
+        <hr className="mb-4 mt-0" />
 
-          {/* SELECTOR DE PLAN (dinámico) */}
-          <div className="form-group my-1">
-            <button type="button" className="btn btn-outline-primary" onClick={() => window.location.reload()}>Volver a Seleccionar carrera</button>
-            <label className='fs-6 fw-medium mb-1'>Plan de estudio:</label>
-            <div>
-              {career && Array.isArray(career.planes) && career.planes.length > 0 ? (
-                <select
-                  className="form-control form-control-sm"
-                  value={selectedPlanValue}
-                  onChange={handlePlanChange}
-                  aria-label="Selecciona el plan de estudios"
-                >
-                  <option value="">-- Selecciona un plan --</option>
-                  {career.planes.map((p) => (
-                    <option key={String(p.value)} value={String(p.value)}>{getPlanLabel(p)}</option>
-                  ))}
-                </select>
+        <form onSubmit={handleSubmit}>
+          {/* Botón para re-seleccionar carrera */}
+          <div className="mb-3 d-flex justify-content-center">
+            <button
+              type="button"
+              className="btn btn-outline-primary w-100"
+              onClick={() => {
+                const event = new CustomEvent("open-career-selector");
+                window.dispatchEvent(event);
+              }}
+            >
+              Volver a Seleccionar carrera
+            </button>
+          </div>
+
+          {/* Plan de estudio */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Plan de estudio:</label>
+            <select
+              className="form-select"
+              value={selectedPlan?.value || ""}
+              onChange={handlePlanChange}
+              disabled={!planOptions.length}
+            >
+              <option value="">Selecciona un plan</option>
+              {planOptions.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {getPlanLabel(p)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Semestres / periodos */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold">
+              Semestres / periodos disponibles:
+            </label>
+            <div className="d-flex flex-wrap gap-2">
+              {periodOptions.length ? (
+                periodOptions.map((p) => {
+                  const val = String(p.value);
+                  const checked = semesters.map(String).includes(val);
+                  return (
+                    <div className="form-check me-3" key={val}>
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id={`period-${val}`}
+                        checked={checked}
+                        onChange={() => handleSemesterToggle(val)}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`period-${val}`}
+                      >
+                        {p.text || val}
+                      </label>
+                    </div>
+                  );
+                })
               ) : (
-                <div className="text-muted">No hay planes disponibles para la carrera seleccionada. Selecciona una carrera primero.</div>
+                <span>Selecciona primero un plan de estudios.</span>
               )}
             </div>
           </div>
 
-          {/* CHECKBOXES DE PERIODOS (semestres) según plan.periodos */}
-          {selectedPlanObj && Array.isArray(selectedPlanObj.periodos) && selectedPlanObj.periodos.length > 0 ? (
-            <div className="form-group my-1">
-              <label className='fs-6 fw-medium mb-1'>Semestres / periodos disponibles:</label>
-              <div>
-                {selectedPlanObj.periodos.map((period) => {
-                  const semValue = String(period.value);
-                  const semText = period.text ?? period.value;
-                  return (
-                    <div key={semValue} className="form-check form-check-inline">
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        id={`plan-${selectedPlanValue}-periodo-${semValue}`}
-                        name="semestres"
-                        value={semValue}
-                        onChange={handlePeriodCheckbox}
-                        checked={Array.isArray(semesters) ? semesters.map(String).includes(semValue) : false}
-                      />
-                      <label className="form-check-label" htmlFor={`plan-${selectedPlanValue}-periodo-${semValue}`}>
-                        {semText}
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* Rango de horas */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold d-block">
+              Hora deseada de inicio y fin de clases:
+            </label>
+            <div className="d-flex align-items-center gap-2">
+              <input
+                type="time"
+                className="form-control"
+                value={startTime}
+                onChange={(e) => handleTimeChange(e, "start")}
+              />
+              <span className="mx-1">–</span>
+              <input
+                type="time"
+                className="form-control"
+                value={endTime}
+                onChange={(e) => handleTimeChange(e, "end")}
+              />
             </div>
-          ) : (
-            <div className="form-group my-1">
-              <label className='fs-6 fw-medium mb-1'>Semestre al que perteneces:</label>
-              <div className="text-muted">Selecciona un plan para ver los periodos (semestres) disponibles.</div>
+          </div>
+
+          {/* Botones de exclusión / materias */}
+          <div className="mb-3 d-grid gap-2">
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => setExcludedTeachersModalOpen(true)}
+            >
+              Excluir profesores
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => setExcludedSubjectModalOpen(true)}
+            >
+              Excluir asignaturas
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setRequiredSubjectsModalOpen(true)}
+            >
+              Asignaturas obligatorias
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setExtraSubjectsModalOpen(true)}
+            >
+              Asignaturas extra
+            </button>
+          </div>
+
+          {/* Mensaje de error */}
+          {formError && (
+            <div className="alert alert-warning py-2" role="alert">
+              {formError}
             </div>
           )}
 
-          {/* HORA DE INICIO / FIN */}
-          <div className="form-group my-1">
-            <label className='fs-6 fw-medium mb-1'>Hora deseada de inicio y fin de clases:</label>
-            <div className="d-flex justify-content-between py-0 my-0">
-              <input
-                title="Hora de entrada"
-                type="time"
-                min="07:00:00"
-                max="22:00:00"
-                className="form-control my-0 py-0 text-center"
-                name="horaInicio"
-                value={startTime}
-                onChange={(e) => dispatch(changeStartTime(e.target.value))}
-                style={{ height: '35px' }}
-              />
-              <div className=''>
-                <p className='mx-1 fw font-monospace fs-4 py-0 my-0'> - </p>
-              </div>
-              <input
-                title="Hora de salida"
-                type="time"
-                min="07:00:00"
-                max="22:00:00"
-                className="form-control my-0 py-0 text-center"
-                name="horaFin"
-                value={endTime}
-                onChange={(e) => dispatch(changeEndTime(e.target.value))}
-                style={{ height: '35px' }}
-              />
-            </div>
-          </div>
-
-          {/* BOTONES DE MODALES */}
-          <div className="form-group my-1 d-grid mt-3">
-            <button type="button" className="btn btn-outline-primary" onClick={() => { setExcludedTeachersModalOpen(true); }} title="Excluir profesores">
-              Excluir profesores
+          {/* Botón Generar */}
+          <div className="mt-4 d-grid">
+            <button
+              type="submit"
+              className="btn btn-success btn-lg"
+              disabled={loading}
+            >
+              {loading ? "Generando horarios..." : "Generar"}
             </button>
           </div>
-
-          <div className="form-group my-1 d-grid mt-3">
-            <button type="button" className="btn btn-outline-primary" onClick={() => { setExcludedSubjectModalOpen(true); }} title="Excluir asignaturas">
-              Excluir asignaturas
-            </button>
-          </div>
-
-          {/* BOTÓN GENERAR */}
-          <div className='d-grid mt-3'>
-            <hr />
-            <button type="submit" className="btn btn-outline-success btn-lg " title="Generar todos los horarios">
-              Generar
-            </button>
-          </div>
-
         </form>
-
-        {loading && (
-          <div className="modal" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(255, 255, 255, 0.8)', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="loading-spinner"></div>
-          </div>
-        )}
       </div>
     </div>
   );
