@@ -14,10 +14,14 @@ const ScheduleViwer = () => {
     (state) => state.viwer.displayedSchedule
   );
 
-  // Cuando cambia el horario seleccionado en el picker, lo mostramos
+  // Cuando cambia el horario seleccionado en el picker, lo mostramos.
+  // Si schedulePicked es null, limpiamos el horario mostrado.
   useEffect(() => {
     if (schedulePicked) {
       dispatch(displaySchedule(schedulePicked));
+    } else {
+      // limpiar el viewer cuando no hay horario seleccionado
+      dispatch(displaySchedule(null));
     }
   }, [schedulePicked, dispatch]);
 
@@ -33,17 +37,17 @@ const ScheduleViwer = () => {
   };
 
   const popularity =
-    displayedSchedule && typeof displayedSchedule.avg_positive_score === "number"
+    displayedSchedule &&
+    typeof displayedSchedule.avg_positive_score === "number"
       ? displayedSchedule.avg_positive_score
-      : displayedSchedule && typeof displayedSchedule.popularity === "number"
+      : displayedSchedule &&
+        typeof displayedSchedule.popularity === "number"
       ? displayedSchedule.popularity
       : 0;
 
   const popularityText = popularity.toFixed(4);
   const totalCredits =
-    (displayedSchedule &&
-      displayedSchedule.total_credits_required) ||
-    0;
+    (displayedSchedule && displayedSchedule.total_credits_required) || 0;
 
   return (
     <div className="card shadow-sm px-3 py-0 h-100">
@@ -82,7 +86,14 @@ const ScheduleViwer = () => {
         />
 
         <div className="flex-grow-1 mb-2">
-          <Schedule selectedSchedule={displayedSchedule} ref={componentRef} />
+          {displayedSchedule ? (
+            <Schedule selectedSchedule={displayedSchedule} ref={componentRef} />
+          ) : (
+            <div className="h-100 d-flex align-items-center justify-content-center text-muted text-center px-3">
+              No hay horario seleccionado todavía.<br />
+              Genera horarios y elige uno en la parte superior.
+            </div>
+          )}
         </div>
 
         <div className="row text-end w-100">

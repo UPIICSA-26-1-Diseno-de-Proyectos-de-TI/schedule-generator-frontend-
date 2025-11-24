@@ -23,6 +23,10 @@ const initialState = {
 
   // Estado de carga
   isGenerating: false,
+
+  // Resumen de la última generación (para el modal emergente)
+  // { success: boolean, count: number, reasons: string[], suggestions: string[] }
+  generationSummary: null,
 };
 
 const formSlice = createSlice({
@@ -132,6 +136,14 @@ const formSlice = createSlice({
     finishScheduleGeneration(state) {
       state.isGenerating = false;
     },
+
+    // Resumen de la generación (para el modal emergente)
+    setGenerationSummary(state, action) {
+      state.generationSummary = action.payload;
+    },
+    clearGenerationSummary(state) {
+      state.generationSummary = null;
+    },
   },
 });
 
@@ -154,6 +166,8 @@ export const {
   removeRequiredSubject,
   startScheduleGeneration,
   finishScheduleGeneration,
+  setGenerationSummary,
+  clearGenerationSummary,
 } = formSlice.actions;
 
 export default formSlice.reducer;
