@@ -21,9 +21,7 @@ const Session = ({ session }) => {
         {session.sequence}
       </p>
       <p className="text-center text-capitalize fw-medium m-1 fs-6 lh-sm">
-        <Link to={`/profesor/${session.teacher}`} target="_blank">
           {session.teacher}
-        </Link>
       </p>
 
       <p className="text-center m-1 fs-6 lh-sm">
