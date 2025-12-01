@@ -115,16 +115,10 @@ export default function CareerSelector() {
 
   // ----- 3) Abrir SOLO la primera vez que no hay carrera -----
   useEffect(() => {
-    try {
-      const hasCareerFlag =
-        sessionStorage.getItem('generator_has_career') === 'true';
-
-      if (!career && !hasCareerFlag) {
-        // primera vez sin carrera: abrimos modal
-        setIsOpen(true);
-      }
-    } catch {
-      if (!career) setIsOpen(true);
+    // Mostrar el selector de carrera al cargar la página si NO hay carrera
+    // (mostramos siempre en ausencia de carrera para facilitar la selección)
+    if (!career) {
+      setIsOpen(true);
     }
   }, [career]);
 

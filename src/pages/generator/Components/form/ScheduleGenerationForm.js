@@ -9,6 +9,7 @@ import {
   changeStartTime,
   clearGenerationSummary,
 } from "../../../../store/slices/form/formSlice";
+import { setSelectedPlan as setSelectedPlanRedux } from "../../../../store/slices/form/formSlice";
 import { getSchedules } from "../../../../store/slices/form/thunks";
 import CareerSelector from "./components/CareerSelector";
 import TeacherExcluder from "./components/TeacherExcluder";
@@ -58,11 +59,15 @@ const ScheduleGenerationForm = () => {
   // Cuando cambia la carrera, si no hay plan seleccionado, tomamos el primero
   useEffect(() => {
     if (career && Array.isArray(career.planes) && career.planes.length > 0) {
-      setSelectedPlan((prev) => prev || career.planes[0]);
+      const firstPlan = career.planes[0];
+      setSelectedPlan((prev) => prev || firstPlan);
+      // sincronizar con el store (guardamos el plan por defecto al cambiar de carrera)
+      dispatch(setSelectedPlanRedux(firstPlan));
     } else {
       setSelectedPlan(null);
+      dispatch(setSelectedPlanRedux(null));
     }
-  }, [career]);
+  }, [career, dispatch]);
 
   const handleTimeChange = (e, type) => {
     const value = e.target.value;
@@ -88,7 +93,9 @@ const ScheduleGenerationForm = () => {
 
     const plans = career?.planes || [];
     const plan = plans.find((p) => String(p.value) === String(value)) || null;
-    setSelectedPlan(plan);
+  setSelectedPlan(plan);
+  // sincronizar selección con el store para que el thunk la use
+  dispatch(setSelectedPlanRedux(plan));
 
     // Al cambiar de plan, limpiamos semestres seleccionados
     if (Array.isArray(semesters) && semesters.length > 0) {

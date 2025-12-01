@@ -35,17 +35,6 @@ const ScheduleViwer = () => {
       dispatch(addSavedSchedule(displayedSchedule));
     }
   };
-
-  const popularity =
-    displayedSchedule &&
-    typeof displayedSchedule.avg_positive_score === "number"
-      ? displayedSchedule.avg_positive_score
-      : displayedSchedule &&
-        typeof displayedSchedule.popularity === "number"
-      ? displayedSchedule.popularity
-      : 0;
-
-  const popularityText = popularity.toFixed(4);
   const totalCredits =
     (displayedSchedule && displayedSchedule.total_credits_required) || 0;
 
@@ -53,7 +42,7 @@ const ScheduleViwer = () => {
     <div className="card shadow-sm px-3 py-0 h-100">
       <div className="card-body px-2 py-3 d-flex flex-column">
         <div className="d-flex justify-content-between align-items-center mb-2">
-          <h4 className="card-title mb-0">Horario</h4>
+          <h4 className="card-title mb-0 mx-auto">Horario</h4>
           <div className="d-flex">
             <button
               type="button"
@@ -96,16 +85,15 @@ const ScheduleViwer = () => {
           )}
         </div>
 
-        <div className="row text-end w-100">
-          <div className="col-12">
-            <span className="d-inline">
-              <p className="mb-0">
-                Popularidad: {popularityText} | Total de créditos requerido:{" "}
-                {totalCredits}
-              </p>
-            </span>
+        {displayedSchedule && (
+          <div className="row text-end w-100">
+            <div className="col-12">
+              <span className="d-inline">
+                <p className="mb-0">Total de créditos requerido: {totalCredits}</p>
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

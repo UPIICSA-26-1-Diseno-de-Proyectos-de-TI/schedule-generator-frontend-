@@ -8,6 +8,7 @@ const initialState = {
   startTime: "07:00",
   endTime: "15:00",
   career: null,              // objeto carrera { value, text, planes }
+  selectedPlan: null,        // plan seleccionado (objeto) — usado por el thunk
   shifts: ["M", "V"],        // turnos disponibles (por ahora fijo)
 
   // Parámetros del generador
@@ -59,6 +60,12 @@ const formSlice = createSlice({
       // al cambiar de carrera reiniciamos periodos
       state.semesters = [];
       state.levels = [];
+      // limpiar selección de plan cuando cambia la carrera
+      state.selectedPlan = null;
+    },
+
+    setSelectedPlan(state, action) {
+      state.selectedPlan = action.payload;
     },
 
     changeCourseLength(state, action) {
@@ -156,6 +163,7 @@ export const {
   changeCourseLength,
   changeCredits,
   changeAvailableUses,
+  setSelectedPlan,
   addExcludedTeachers,
   removeExcludedTeachers,
   addExcludedSubjects,

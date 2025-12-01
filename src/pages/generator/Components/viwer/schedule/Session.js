@@ -26,13 +26,6 @@ const Session = ({ session }) => {
         </Link>
       </p>
 
-      {/* Si el backend no envía puntuación, simplemente no mostramos la línea */}
-      {hasPositiveScore && (
-        <p className="text-center m-1 fs-6 lh-sm">
-          {session.positiveScore.toFixed(2)}
-        </p>
-      )}
-
       <p className="text-center m-1 fs-6 lh-sm">
         Lugares: {session.availability}
       </p>
