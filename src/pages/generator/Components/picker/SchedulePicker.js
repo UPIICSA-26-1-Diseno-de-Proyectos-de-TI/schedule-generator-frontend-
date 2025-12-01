@@ -21,7 +21,6 @@ const SchedulePicker = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
 
   const mode = useSelector((state) => state.picker.mode);
-  const selectedSchedule = useSelector((state) => state.picker.selectedSchedule);
   const schedules = useSelector((state) => state.picker.schedules);
   const savedSchedules = useSelector((state) => state.picker.savedSchedules);
 

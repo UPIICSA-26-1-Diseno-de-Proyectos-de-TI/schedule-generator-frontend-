@@ -21,6 +21,29 @@ export default function Login() {
       return null;
     }
   });
+
+  // Mantener en sessionStorage para compatibilidad y evitar warnings de variables no usadas
+  useEffect(() => {
+    try {
+      if (hiddenFields) {
+        sessionStorage.setItem('saes_hidden_fields', JSON.stringify(hiddenFields));
+      } else {
+        sessionStorage.removeItem('saes_hidden_fields');
+      }
+    } catch (e) {
+      /* noop */
+    }
+  }, [hiddenFields]);
+
+  useEffect(() => {
+    try {
+      if (cookies) {
+        sessionStorage.setItem('saes_cookies', JSON.stringify(cookies));
+      }
+    } catch (e) {
+      /* noop */
+    }
+  }, [cookies]);
   const [boleta, setBoleta] = useState('');
   const [clave, setClave] = useState('');
   const [boletaError, setBoletaError] = useState('');
