@@ -7,19 +7,25 @@ import { setCareer } from '../../../../../store/slices/form/formSlice';
 Modal.setAppElement('#root');
 
 const BookIcon = ({ size = 34, stroke = 'rgba(255,255,255,0.95)' }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-    stroke={stroke}
-    strokeWidth="1.5"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m0-12c-1-.667-2.667-1-5-1s-4 .333-5 1v12c1-.667 2.667-1 5-1s4 .333 5 1m0-12c1-.667 2.667-1 5-1s4 .333 5 1v12c-1-.667-2.667-1-5-1s-4 .333-5 1" />
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <rect
+      x="3"
+      y="4"
+      width="14"
+      height="14"
+      rx="1.5"
+      stroke={stroke}
+      strokeWidth="1.2"
+      fill="rgba(255,255,255,0.08)"
+    />
+    <path
+      d="M7 7h8"
+      stroke={stroke}
+      strokeWidth="1.1"
+      strokeLinecap="round"
+    />
   </svg>
 );
-
 
 function deterministicDarkColor(key) {
   const s = String(key || 'x');
