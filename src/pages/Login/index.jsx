@@ -23,6 +23,7 @@ export default function Login() {
   });
   const [boleta, setBoleta] = useState('');
   const [clave, setClave] = useState('');
+  const [boletaError, setBoletaError] = useState('');
   const [captchaText, setCaptchaText] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ kind: 'idle', msg: '' }); // idle | loading | success | error
@@ -325,7 +326,14 @@ export default function Login() {
   // ---------- submit login ----------
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!boleta || !clave || !captchaText) {
+    // Validaciones: boleta debe ser exactamente 10 dígitos
+    if (!/^[0-9]{10}$/.test(boleta)) {
+      setBoletaError('La boleta debe contener exactamente 10 dígitos.');
+      setStatus({ kind: 'error', msg: 'La boleta debe contener exactamente 10 dígitos.' });
+      return;
+    }
+
+    if (!clave || !captchaText) {
       setStatus({ kind: 'error', msg: 'Completa todos los campos.' });
       return;
     }
@@ -472,6 +480,22 @@ export default function Login() {
 
   const showSpinner = loading || status.kind === 'loading';
 
+  // Maneja cambios en el input de boleta: solo dígitos y máximo 10
+  function handleBoletaChange(e) {
+    const raw = String(e.target.value || '');
+    // eliminar no-dígitos
+    const digits = raw.replace(/\D+/g, '').slice(0, 10);
+    setBoleta(digits);
+    // validar longitud solo si está completo o si hay contenido inválido
+    if (digits.length === 10) {
+      setBoletaError('');
+    } else if (digits.length > 0) {
+      setBoletaError('La boleta debe tener 10 dígitos.');
+    } else {
+      setBoletaError('');
+    }
+  }
+
   // ---------- iconos overlay ----------
   const SuccessIcon = () => (
     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -538,14 +562,35 @@ export default function Login() {
               className={`login-form ${overlayVisible ? 'muted' : ''}`}
               autoComplete="off"
             >
+              <p className='fw-light'>
+                Accede al sistema usando la misma boleta y clave con la que ingresas a tu sesión de SAES.{' '}
+                <span
+                  className="d-inline-block"
+                  tabIndex={0}
+                  title="El generador de horarios utiliza tus credenciales para extraer la oferta de unidades de aprendizaje del SAES en tiempo real."
+                
+                >
+                  (?)
+                </span>
+              </p>
               <label>
                 Número de boleta
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={boleta}
-                  onChange={e => setBoleta(e.target.value)}
+                  onChange={handleBoletaChange}
                   placeholder="Ej. 2023123456"
+                  maxLength={10}
+                  pattern="\d{10}"
+                  aria-invalid={!!boletaError}
+                  title="Solo dígitos, exactamente 10"
                 />
+                {boletaError && (
+                  <div className="field-error" role="alert">
+                    {boletaError}
+                  </div>
+                )}
               </label>
 
               <label>
