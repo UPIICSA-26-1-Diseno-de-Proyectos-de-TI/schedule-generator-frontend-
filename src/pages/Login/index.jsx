@@ -28,6 +28,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ kind: 'idle', msg: '' }); // idle | loading | success | error
 
+  // mostrar / ocultar contraseña
+  const [showPassword, setShowPassword] = useState(false);
+
   // overlay (pantalla flotante)
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [overlayResult, setOverlayResult] = useState(null); // null | 'success' | 'error'
@@ -243,8 +246,6 @@ export default function Login() {
   }
 
   async function loadCaptchaForSession(sid) {
-    // El backend nuevo realmente ignora session_id en query y siempre genera uno nuevo,
-    // pero mandamos el valor por si alguna vez se usa.
     if (fetchingCaptchaRef.current) return false;
     fetchingCaptchaRef.current = true;
     setStatus({ kind: 'loading', msg: 'Cargando CAPTCHA...' });
@@ -310,7 +311,6 @@ export default function Login() {
         throw new Error('Respuesta inesperada en /captcha/refresh: ' + contentType + ' / ' + text.slice(0, 200));
       }
 
-      // 🔹 Siempre que se refresca el captcha, limpiamos el campo de texto
       setCaptchaText('');
     } catch (err) {
       console.error('refreshCaptcha error', err);
@@ -326,7 +326,6 @@ export default function Login() {
   // ---------- submit login ----------
   async function handleSubmit(e) {
     e.preventDefault();
-    // Validaciones: boleta debe ser exactamente 10 dígitos
     if (!/^[0-9]{10}$/.test(boleta)) {
       setBoletaError('La boleta debe contener exactamente 10 dígitos.');
       setStatus({ kind: 'error', msg: 'La boleta debe contener exactamente 10 dígitos.' });
@@ -338,9 +337,8 @@ export default function Login() {
       return;
     }
 
-    // mostrar overlay (pantalla de carga)
     setOverlayVisible(true);
-    setOverlayResult(null); // aún sin resultado
+    setOverlayResult(null);
     setLoading(true);
     setStatus({ kind: 'loading', msg: 'Iniciando sesión...' });
 
@@ -377,7 +375,6 @@ export default function Login() {
           result.status === 'ok' ||
           result.status === 'success')
       ) {
-        // Guardar datos para el generador
         try {
           sessionStorage.setItem('saes_user_data', JSON.stringify(result));
           const carreras =
@@ -398,7 +395,6 @@ export default function Login() {
         });
         setOverlayResult('success');
 
-        // limpiar campos sensibles
         setClave('');
         setCaptchaText('');
         sessionStorage.removeItem('saes_cookies');
@@ -417,7 +413,6 @@ export default function Login() {
         });
         setOverlayResult('error');
 
-        // limpiar texto del captcha al fallar
         setCaptchaText('');
 
         setTimeout(() => {
@@ -480,13 +475,10 @@ export default function Login() {
 
   const showSpinner = loading || status.kind === 'loading';
 
-  // Maneja cambios en el input de boleta: solo dígitos y máximo 10
   function handleBoletaChange(e) {
     const raw = String(e.target.value || '');
-    // eliminar no-dígitos
     const digits = raw.replace(/\D+/g, '').slice(0, 10);
     setBoleta(digits);
-    // validar longitud solo si está completo o si hay contenido inválido
     if (digits.length === 10) {
       setBoletaError('');
     } else if (digits.length > 0) {
@@ -496,7 +488,6 @@ export default function Login() {
     }
   }
 
-  // ---------- iconos overlay ----------
   const SuccessIcon = () => (
     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle
@@ -563,12 +554,11 @@ export default function Login() {
               autoComplete="off"
             >
               <p className='fw-light'>
-                Accede al sistema usando la misma boleta y clave con la que ingresas a tu sesión de SAES.{' '}
+                Accede al sistema usando la misma boleta y clave con la que ingresas a tu sesión de SAES.{` `}
                 <span
                   className="d-inline-block"
                   tabIndex={0}
                   title="El generador de horarios utiliza tus credenciales para extraer la oferta de unidades de aprendizaje del SAES en tiempo real."
-                
                 >
                   (?)
                 </span>
@@ -595,12 +585,29 @@ export default function Login() {
 
               <label>
                 Clave
-                <input
-                  type="password"
-                  value={clave}
-                  onChange={e => setClave(e.target.value)}
-                  placeholder="Tu clave"
-                />
+                <div className="password-row">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={clave}
+                    onChange={e => setClave(e.target.value)}
+                    placeholder="Tu clave"
+                  />
+                  <button
+                    type="button"
+                    className="btn-secondary btn-show-password"
+                    onClick={() => setShowPassword(prev => !prev)}
+                  >
+                    {showPassword ? 'Ocultar' : 'Mostrar'}
+                  </button>
+                </div>
+                <a
+                  href="https://www.saes.upiicsa.ipn.mx/SendEmail/RecuperaPass.aspx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="forgot-link"
+                >
+                  ¿Olvidaste tu contraseña?
+                </a>
               </label>
 
               <div className="captcha-row">

@@ -93,9 +93,9 @@ const ScheduleGenerationForm = () => {
 
     const plans = career?.planes || [];
     const plan = plans.find((p) => String(p.value) === String(value)) || null;
-  setSelectedPlan(plan);
-  // sincronizar selección con el store para que el thunk la use
-  dispatch(setSelectedPlanRedux(plan));
+    setSelectedPlan(plan);
+    // sincronizar selección con el store para que el thunk la use
+    dispatch(setSelectedPlanRedux(plan));
 
     // Al cambiar de plan, limpiamos semestres seleccionados
     if (Array.isArray(semesters) && semesters.length > 0) {
@@ -182,7 +182,7 @@ const ScheduleGenerationForm = () => {
           // no pasar de 90 mientras siga en loading
           return next >= 90 ? 90 : next;
         });
-      }, 120);
+      }, 960);
     }
 
     // cuando termina la generación
@@ -238,6 +238,13 @@ const ScheduleGenerationForm = () => {
     dispatch(clearGenerationSummary());
   };
 
+  const handleGoToLogin = () => {
+    // cerrar modal, limpiar resumen y redirigir al login principal
+    setSummaryModalOpen(false);
+    dispatch(clearGenerationSummary());
+    window.location.href = "/";
+  };
+
   const renderSummaryTitle = () => {
     if (!generationSummary) return "Resultado de la generación";
 
@@ -250,6 +257,11 @@ const ScheduleGenerationForm = () => {
         ? `Se generaron ${n} horarios válidos`
         : "Generación completada";
     }
+
+    if (generationSummary.status === "session_expired") {
+      return "La sesión ha expirado";
+    }
+
     return "No se pudieron generar horarios con los parámetros actuales";
   };
 
@@ -318,6 +330,26 @@ const ScheduleGenerationForm = () => {
   };
 
   const planPeriodos = selectedPlan?.periodos || [];
+
+    const excludedTeachersCount = Array.isArray(excludedTeachers)
+    ? excludedTeachers.length
+    : 0;
+
+  const excludedSubjectsCount = Array.isArray(excludedSubjects)
+    ? excludedSubjects.length
+    : 0;
+
+  const teachersLabel =
+    excludedTeachersCount === 0
+      ? 'Elegir profesores (no hay profesores excluidos)'
+      : `Elegir profesores (${excludedTeachersCount} profesor${excludedTeachersCount > 1 ? 'es' : ''} excluido${excludedTeachersCount > 1 ? 's' : ''})`;
+
+  const subjectsLabel =
+    excludedSubjectsCount === 0
+      ? 'Elegir asignaturas (no hay asignaturas excluidas)'
+      : `Elegir asignaturas (${excludedSubjectsCount} asignatura${excludedSubjectsCount > 1 ? 's' : ''} excluida${excludedSubjectsCount > 1 ? 's' : ''})`;
+
+
 
   return (
     <>
@@ -476,7 +508,8 @@ const ScheduleGenerationForm = () => {
               />
             </div>
 
-            {/* Créditos */}
+{/*
+            
             <div className="mb-3">
               <label className="form-label fw-semibold">Créditos</label>
               <input
@@ -494,7 +527,7 @@ const ScheduleGenerationForm = () => {
                 }}
               />
             </div>
-
+*/}
             {/* Botón Generar */}
             <div className="mt-2 mb-2 d-grid">
               <button
@@ -536,14 +569,14 @@ const ScheduleGenerationForm = () => {
             </p>
 
             {/* Botones de exclusión / materias */}
-            <div className="mb-3 d-grid gap-2">
+                        <div className="mb-3 d-grid gap-2">
               <button
                 type="button"
                 className="btn btn-outline-primary"
                 onClick={() => setExcludedTeachersModalOpen(true)}
                 disabled={loading}
               >
-                Elegir profesores
+                {teachersLabel}
               </button>
 
               <button
@@ -552,28 +585,10 @@ const ScheduleGenerationForm = () => {
                 onClick={() => setExcludedSubjectModalOpen(true)}
                 disabled={loading}
               >
-                Elegir asignaturas
-              </button>
-
-
-
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setRequiredSubjectsModalOpen(true)}
-                disabled={loading}
-              >
-                Asignaturas obligatorias
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setExtraSubjectsModalOpen(true)}
-                disabled={loading}
-              >
-                Asignaturas extra
+                {subjectsLabel}
               </button>
             </div>
+
 
             {/* Mensaje de error simple del formulario */}
             {formError && (
@@ -607,13 +622,32 @@ const ScheduleGenerationForm = () => {
               </div>
               <div className="modal-body">{renderSummaryBody()}</div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={closeSummaryModal}
-                >
-                  Aceptar
-                </button>
+                {generationSummary.status === "session_expired" ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={closeSummaryModal}
+                    >
+                      Seguir aquí
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleGoToLogin}
+                    >
+                      Ir al login
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={closeSummaryModal}
+                  >
+                    Aceptar
+                  </button>
+                )}
               </div>
             </div>
           </div>

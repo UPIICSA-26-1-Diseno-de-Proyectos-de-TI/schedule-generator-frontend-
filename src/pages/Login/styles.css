@@ -99,6 +99,38 @@
   pointer-events: none;
 }
 
+/* ---------- fila clave + botón Mostrar ---------- */
+
+.password-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.password-row input {
+  flex: 1;
+}
+
+.btn-show-password {
+  padding-inline: 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* enlace ¿Olvidaste tu contraseña? */
+
+.forgot-link {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
 /* ---------- Captcha ---------- */
 
 .captcha-row {
@@ -110,7 +142,7 @@
 /* 🔹 Aumentamos el tamaño del recuadro ~30% y lo hacemos adaptable */
 .captcha-image-container {
   flex: 1;
-  min-height: 80px; /* antes 60px, ~33% más grande */
+  min-height: 80px;
   border-radius: 6px;
   border: 1px solid #e2e8f0;
   display: flex;
@@ -121,7 +153,7 @@
 
 .captcha-image {
   max-width: 100%;
-  max-height: 110px; /* antes 80px, ~37% más grande */
+  max-height: 110px;
   object-fit: contain;
 }
 
@@ -311,5 +343,16 @@
 
   .card {
     max-width: 100%;
+  }
+
+  /* en pantallas muy pequeñas, apilar clave + botón Mostrar */
+  .password-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-show-password {
+    width: 100%;
+    justify-content: center;
   }
 }

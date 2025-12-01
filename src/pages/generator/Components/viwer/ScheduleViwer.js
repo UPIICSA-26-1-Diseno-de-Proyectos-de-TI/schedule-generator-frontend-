@@ -89,7 +89,7 @@ const ScheduleViwer = () => {
           <div className="row text-end w-100">
             <div className="col-12">
               <span className="d-inline">
-                <p className="mb-0">Total de créditos requerido: {totalCredits}</p>
+                {/* <p className="mb-0">Total de créditos requerido: {totalCredits}</p> */}
               </span>
             </div>
           </div>

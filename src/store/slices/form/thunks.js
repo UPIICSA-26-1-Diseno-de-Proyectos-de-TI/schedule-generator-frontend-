@@ -366,6 +366,7 @@ export const getSchedules = (params = {}) => {
       // Resumen específico para errores de red / backend
       const reasons = [];
       const suggestions = [];
+      let status = "error";
 
       if (err.response?.status === 422) {
         reasons.push(
@@ -373,6 +374,18 @@ export const getSchedules = (params = {}) => {
         );
         suggestions.push(
           "Verifica que el número de materias sea mayor a 2 y los créditos mayores a 0."
+        );
+      } else if (
+        err.response?.status === 401 ||
+        (typeof err.response?.data?.detail === "string" &&
+          err.response.data.detail
+            .toLowerCase()
+            .includes("sesion no encontrada o expirada"))
+      ) {
+        status = "session_expired";
+        reasons.push("La sesión con SAES no se encontró o ha expirado.");
+        suggestions.push(
+          "Vuelve a iniciar sesión con tu boleta y contraseña para continuar generando horarios."
         );
       } else if (err.message?.toLowerCase().includes("network")) {
         reasons.push("No se pudo contactar al servidor de horarios.");
@@ -383,6 +396,7 @@ export const getSchedules = (params = {}) => {
         err.message &&
         err.message.includes("No se encontró la sesión de SAES")
       ) {
+        status = "session_expired";
         reasons.push("No se encontró la sesión activa de SAES.");
         suggestions.push(
           "Vuelve a iniciar sesión en el módulo de acceso antes de generar horarios."
@@ -396,7 +410,7 @@ export const getSchedules = (params = {}) => {
 
       dispatch(
         setGenerationSummary({
-          status: "error",
+          status,
           success: false,
           count: 0,
           message: "Ocurrió un problema al generar los horarios.",
