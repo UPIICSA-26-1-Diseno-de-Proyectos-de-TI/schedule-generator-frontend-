@@ -390,7 +390,7 @@ export const getSchedules = (params = {}) => {
       } else if (err.message?.toLowerCase().includes("network")) {
         reasons.push("No se pudo contactar al servidor de horarios.");
         suggestions.push(
-          "Revisa tu conexión a internet y que el backend siga ejecutándose en 127.0.0.1:8000."
+          "Revisa tu conexión a internet y que el backend siga ejecutándose en 127.0.0.1:3000."
         );
       } else if (
         err.message &&

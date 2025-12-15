@@ -7,12 +7,13 @@
 /* Contenedor general */
 .gen-layout {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: space-between;
   gap: 24px;              /* separación real entre columnas */
   width: 100%;
-  margin: 0 auto;         /* centra el bloque completo */
-  padding: 18px;
+  min-height: 100vh;
+  margin: 0;
+  padding: 16px 20px;
   box-sizing: border-box;
 }
 
@@ -23,6 +24,7 @@
   flex-direction: column;
   gap: 16px;              /* espacio entre “Horario” y “Horarios generados” */
   min-width: 0;
+  min-height: 100%;
 }
 
 /* Columna derecha: panel de Ajustes */
@@ -31,6 +33,22 @@
   max-width: 380px;
   width: 100%;
   min-width: 300px;
+}
+
+/* El visor de horarios debe crecer para llenar la pantalla disponible */
+.gen-left .gen-card-block:first-child {
+  flex: 1 1 0;
+  display: flex;
+}
+
+.gen-left .gen-card-block:first-child .card {
+  flex: 1 1 0;
+  display: flex;
+}
+
+.gen-left .gen-card-block:first-child .card-body {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Bloques que envuelven cada card */

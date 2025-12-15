@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './styles.css';
 
 // const API_BASE = process.env.REACT_APP_API_BASE || 'http://127.0.0.1:3000';
-const API_BASE = process.env.REACT_APP_API_ENDPOINT || 'http://127.0.0.1:8000';
+const API_BASE = process.env.REACT_APP_API_ENDPOINT || 'http://127.0.0.1:3000';
 
 export default function Login() {
   const navigate = useNavigate();
